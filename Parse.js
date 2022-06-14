@@ -1,7 +1,7 @@
 import axios from "axios";
 import * as cheerio from "cheerio";
 
-const Parse = async (topic) => {
+export default async function Parse(topic){
   let res = [];
   const val = await axios.get(
     `https://scholar.google.com/scholar?hl=it&as_sdt=0%2C5&q=${topic}&btnG=`,
@@ -14,8 +14,9 @@ const Parse = async (topic) => {
   );
   const $ = cheerio.load(val.data);
   const $$ = cheerio.load(val.data);
-  let x;
-  let y;
+  let x,y;
+  let appo,temp1,temp2;
+  let i=0;
   do {
     x = $("div.gs_or_ggsm:first");
     y = $$("div.gs_ri:first");
@@ -26,15 +27,13 @@ const Parse = async (topic) => {
         !x.text().includes("Full View") ||
         !x.text().includes("ACNP Full Text")
       ) {
-        let appo = x.find("a").attr("href");
-        console.log(appo);
-        let temp1 = y.find("h3.gs_rt").text();
-        console.log(temp1);
-        let temp2 = y.find("div.gs_a").text();
-        console.log(temp2+ "\n");
+        appo = x.find("a").attr("href");
+        temp1 = y.find("h3.gs_rt").text();
+        temp2 = y.find("div.gs_a").text();
+        res[i] = {"url": appo,"title":temp1,"authors":temp2 };
       }
     }
+    i++;
   } while (x.html() != null);
+  return res;
 };
-Parse("ciao");
-// export default Parse
